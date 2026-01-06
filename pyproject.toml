@@ -1,0 +1,85 @@
+[project]
+name = "simple_menu"
+version = "0.0.1"
+description = "simple menu generation"
+dependencies = [
+    #
+]
+# dependencies = []
+
+[project.scripts]
+# i3events = "i3events.cli:main"
+
+[dependency-groups]
+dev = [
+    "icecream",
+    "ipython",
+    "mypy",
+    "ptipython",
+    "ruff",
+    "ty",
+]
+
+## Mypy ########################################################################
+################################################################################
+################################################################################
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = [
+    "icecream.*",
+    #,
+]
+ignore_missing_imports = true
+
+## Pyright #####################################################################
+################################################################################
+################################################################################
+[tool.pyright]
+# Ignore output diagnostics on these globs
+ignore = ["**"]
+
+## Ruff ########################################################################
+################################################################################
+################################################################################
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["ALL"]
+
+ignore = [
+    "ANN002",  # Missing type annotations for *args
+    "ANN003",  # Missing type annotations for **kwargs
+    "COM812",  # missing-trailing-comma
+    "D100",    # missing-docstring-in-public-module
+    "D101",    # undocumented-public-class
+    "D102",    # undocumented-public-method
+    "D103",    # undocumented-public-function
+    "D104",    # missint-docstring-in-public-package
+    "D105",    # undocumented-magic-method
+    "D106",    # undocumented-public-nested-class
+    "D107",    # undocumented-public-init
+    "D403",    # first-line-capitalized
+    "EM101",   # raw-string-in-exception
+    "EM102",   # f-string-in-exception
+    "ERA001",  # Found commented-out code
+    "FBT001",  # boolean-default-value-positional-argument
+    "FBT002",  # Boolean default positional argument in function definition
+    "FBT003",  #
+    "FIX002",  # "Line contains TODO, consider resolving the issue"
+    "G004",    # logging-f-string
+    "PLR0913", # too-many-arguments
+    "PLR2044", # empty-comment
+    "PT009",   # pytest-unittest-assertion
+    "RET505",  # superfluous-else-return
+    "SIM102",  # collapsible-if
+    "SIM108",  # use terniary operator
+    "T201",    # print-found
+    "TD003",   # "Missing issue link for this TODO"
+    "TRY003",  # raise-vanilla-args
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

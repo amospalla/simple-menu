@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+
+###########################################################
+###########################################################
+set -eu -o pipefail -o errtrace
+
+declare progname
+declare progpath
+progname="${0##*/}"
+progpath="${0%/*}"
+
+_exit() {
+    local -i exit_code
+    local -i lineno
+    local bash_command
+    local signal
+
+    signal="${1}"
+    exit_code="${2}"
+    lineno="${3}"
+    bash_command="${4}"
+
+    echo "Exiting because got signal ${signal}, line ${lineno} exit_code ${exit_code} bash_command ${bash_command}"
+    exit "${exit_code}"
+}
+
+trap '_exit ERR     ${?} ${LINENO} ${BASH_COMMAND}' ERR     # return 1, false
+trap '_exit SIGINT  ${?} ${LINENO} ${BASH_COMMAND}' SIGINT  # Ctrl-c
+trap '_exit SIGTERM ${?} ${LINENO} ${BASH_COMMAND}' SIGTERM # kill
+trap '_exit SIGHUP  ${?} ${LINENO} ${BASH_COMMAND}' SIGHUP  # terminal close
+###########################################################
+###########################################################
+
+declare application_dir
+
+if [[ -f "${progpath}/${progname}.config" ]]; then
+    # shellcheck disable=SC1090
+    . "${progpath}/${progname}.config" # Loads application_dir variable
+fi
+
+show_help() {
+    local -i exit_code
+    exit_code="${1:-0}"
+
+    echo "${progname} usage:"
+    echo
+    echo "    ${progname} linters              execute linters against code."
+    echo "    ${progname} -h | --help          show this help."
+
+    exit "${exit_code}"
+}
+
+read_environment_file() {
+    # Read variables from files, but only if these are not already set, variables
+    # from environment take precedence over variables from files.
+    local file
+    local line
+    local -a lines
+    local -a variables=()
+
+    file="${1}"
+    shift 1
+
+    readarray -t lines <"${file}"
+    for line in "${lines[@]}"; do
+        if [[ "${line}" =~ ^([a-zA-Z0-9_]+)= ]]; then
+            variable="${BASH_REMATCH[1]}"
+            variables+=("${variable}")
+        else
+            continue
+        fi
+
+        if [[ -n "${!variable+word}" ]]; then
+            continue # variable already present on environment, ignore
+        fi
+
+        if [[ "${line}" =~ ^${variable}='"'(.*)'"'([[:blank:]]*)?("#".*)?$ ]]; then
+            # <key>="<value>", with optionally ending blanks or ending comment
+            export "${variable}"="${BASH_REMATCH[1]}"
+        elif [[ "${line}" =~ ^${variable}="'"(.*)"'"([[:blank:]])?("#".*)?$ ]]; then
+            # <key>='<value>', with optionally ending blanks or ending comment
+            export "${variable}"="${BASH_REMATCH[1]}"
+        elif [[ "${line}" =~ ^${variable}=(.*)$ ]]; then
+            # <key>=<value>
+            export "${variable}"="${BASH_REMATCH[1]}"
+        fi
+    done
+    # for variable in "${variables[@]}"; do
+    #     echo "variable ${variable}=${!variable}"
+    # done
+}
+
+checks() {
+    if [[ -z "${DIRENV:-}" ]]; then
+        echo 'Error, DIRENV environment variable not set.'
+        exit 1
+    fi
+}
+
+do_linters() {
+    local -i exit_code=0
+
+    cd "${progpath}/../${application_dir}"
+
+    echo mypy
+    if ! mypy .; then
+        exit_code=1
+        echo "mypy exited with status code $?"
+    fi
+
+    echo ty
+    if ! ty check .; then
+        exit_code=1
+        echo "ty exited with status code $?"
+    fi
+
+
+    echo ruff
+    if ! ruff check .; then
+        exit_code=1
+        echo "ruff exited with status code $?"
+    fi
+
+    exit "${exit_code}"
+}
+
+main() {
+    local file
+
+    # Get source folder from direnv, if set, else, it may be set on helper.config
+    if [[ -n "${SRC_PATH}" ]]; then
+        application_dir="${SRC_PATH}"
+    fi
+
+    if [[ -f "${progpath}/../${application_dir}/.env" ]]; then
+        read_environment_file "${progpath}/../${application_dir}/.env"
+    fi
+
+    checks
+    case "${1:-}" in
+        "linters")
+            shift
+            do_linters "${@}"
+            ;;
+        "-h" | "--help")
+            show_help 0
+            ;;
+        *)
+            show_help 1
+            ;;
+    esac
+}
+
+main "${@}"

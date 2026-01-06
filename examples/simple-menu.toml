@@ -1,0 +1,30 @@
+# Audio nodes with these names will be ignored.
+# menu_sound_ignore_nodes = [
+#     "xxxxxx",
+#     "yyyyyy",
+#     #
+# ]
+
+# menu_syncthing_api_token = "xxxxxxxxx"
+# menu_syncthing_api_url = "https://localhost:8384"
+
+# token_separators = [
+#     "::",
+#     ",,",
+#     ";;",
+#     #
+# ]
+
+# These configuration entries are only useful on helper mode and only needed on the
+# configuration file read by root on /etc/simple-menu/simple-menu.toml
+# helper_systemd_toggle_allowed = [
+#     "syncthing.service",
+#     "zerotier-one.service",
+#     #
+# ]
+
+# helper_zerotier_allowed = [
+#     "aaaabbbbccccdddd",
+#     "bbbbccccddddeeee",
+#     #
+# ]
