@@ -18,6 +18,7 @@
 from typing import Literal
 
 PROGRAM_NAME = "simple-menu"
+PROGRAM_VERSION = "0.0.1"
 
 TOKEN_SEPARATORS = [
     "::",  # First level

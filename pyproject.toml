@@ -52,7 +52,6 @@ select = ["ALL"]
 ignore = [
     "ANN002",  # Missing type annotations for *args
     "ANN003",  # Missing type annotations for **kwargs
-    "COM812",  # missing-trailing-comma
     "D100",    # missing-docstring-in-public-module
     "D101",    # undocumented-public-class
     "D102",    # undocumented-public-method

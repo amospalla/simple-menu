@@ -25,7 +25,7 @@ from pathlib import Path
 
 from simple_menu import sudo_helper
 from simple_menu.configuration import get_configuration
-from simple_menu.constants import interface_choices
+from simple_menu.constants import interface_choices, PROGRAM_NAME, PROGRAM_VERSION
 from simple_menu.item import items
 from simple_menu.item.items import get_item_class
 from simple_menu.item.menu import Menu
@@ -46,7 +46,7 @@ def set_logging(verbose: int) -> None:
 
 def parse_args() -> argparse.Namespace:
     """Argument parser definition."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(prog=PROGRAM_NAME)
     parser.add_argument("--verbose", action="count", help="set verbose mode", default=0)
     parser.add_argument("-c", "--config-file", type=Path)
     parser.add_argument(
@@ -56,6 +56,13 @@ def parse_args() -> argparse.Namespace:
         choices=interface_choices,
     )
     parser.add_argument("-s", "--token-separator", type=str, action="append")
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"{PROGRAM_NAME} {PROGRAM_VERSION}",
+    )
+
     command_subparser = parser.add_subparsers(dest="command", required=True)
     subparser_menu = command_subparser.add_parser("menu")
     subparser_item = command_subparser.add_parser("item")
